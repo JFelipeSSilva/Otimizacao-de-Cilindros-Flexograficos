@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Otimização de Cilindros Flexográficos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-4">
+    <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-6">
+        <h1 class="text-2xl font-bold text-center mb-6">Otimização de Cilindros de Impressão Flexográfica</h1>
+
+        <!-- Input Form -->
+        <div class="mb-6">
+            <h2 class="text-xl font-semibold mb-4">Dados da Etiqueta</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Altura (mm)</label>
+                    <input type="number" id="height" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" min="1" step="0.1">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Largura (mm)</label>
+                    <input type="number" id="width" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" min="1" step="0.1">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Quantidade de Cores</label>
+                    <select id="colors" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
+            </div>
+            <button id="calculateBtn" class="mt-4 bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">Calcular Otimização</button>
+        </div>
+
+        <!-- Results Table -->
+        <div id="results" class="mb-6 hidden">
+            <h2 class="text-xl font-semibold mb-4">Resultados</h2>
+            <table class="min-w-full table-auto">
+                <thead>
+                    <tr class="bg-gray-50">
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cilindro (Z)</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Repetições (R)</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gap Calculado (mm)</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsBody">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Manage Cylinders -->
+        <div class="mb-6">
+            <button id="manageBtn" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">Gerenciar Cilindros</button>
+            <div id="manageSection" class="mt-4 hidden">
+                <h2 class="text-xl font-semibold mb-4">Adicionar Cilindro</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Cilindro (Z)</label>
+                        <input type="number" id="newZ" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" min="1">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Quantidade em Estoque</label>
+                        <input type="number" id="newQty" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" min="1">
+                    </div>
+                </div>
+                <button id="addCylinderBtn" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Adicionar</button>
+
+                <h3 class="text-lg font-semibold mt-6 mb-4">Cilindros em Estoque</h3>
+                <ul id="cylinderList" class="space-y-2">
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let cylinders = [];
+
+        function loadCylinders() {
+            const stored = localStorage.getItem('cylinders');
+            if (stored) {
+                cylinders = JSON.parse(stored);
+            }
+            renderCylinderList();
+        }
+
+        function saveCylinders() {
+            localStorage.setItem('cylinders', JSON.stringify(cylinders));
+        }
+
+        function renderCylinderList() {
+            const list = document.getElementById('cylinderList');
+            list.innerHTML = '';
+            cylinders.forEach((cyl, index) => {
+                const li = document.createElement('li');
+                li.className = 'flex justify-between items-center bg-gray-50 p-2 rounded';
+                li.innerHTML = `
+                    <span>Z: ${cyl.z}, Qtd: ${cyl.qty}</span>
+                    <button onclick="deleteCylinder(${index})" class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">Excluir</button>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function addCylinder() {
+            const z = parseInt(document.getElementById('newZ').value);
+            const qty = parseInt(document.getElementById('newQty').value);
+            if (z > 0 && qty > 0) {
+                cylinders.push({ z, qty });
+                saveCylinders();
+                renderCylinderList();
+                document.getElementById('newZ').value = '';
+                document.getElementById('newQty').value = '';
+            } else {
+                alert('Valores inválidos. Z e Quantidade devem ser maiores que 0.');
+            }
+        }
+
+        function deleteCylinder(index) {
+            cylinders.splice(index, 1);
+            saveCylinders();
+            renderCylinderList();
+        }
+
+        function calculate() {
+            const height = parseFloat(document.getElementById('height').value);
+            const width = parseFloat(document.getElementById('width').value);
+            const colors = parseInt(document.getElementById('colors').value);
+
+            if (!height || !width || height <= 0 || width <= 0) {
+                alert('Altura e Largura devem ser maiores que 0.');
+                return;
+            }
+
+            const resultsBody = document.getElementById('resultsBody');
+            resultsBody.innerHTML = '';
+
+            cylinders.filter(cyl => cyl.qty >= colors).forEach(cyl => {
+                const D = cyl.z * 3.175;
+                const minR = Math.floor(D / (height + 3));
+                const maxR = Math.ceil(D / (height + 2));
+                let efficientR = null;
+                let efficientG = null;
+
+                for (let r = Math.max(1, minR); r <= maxR; r++) {
+                    const g = (D / r) - height;
+                    if (g >= 2.0 && g <= 3.0) {
+                        efficientR = r;
+                        efficientG = g;
+                        break; // take the first one
+                    }
+                }
+
+                let status, statusClass, r, g;
+                if (efficientR !== null) {
+                    r = efficientR;
+                    g = efficientG;
+                    status = 'EFICIENTE';
+                    statusClass = 'text-green-600';
+                } else {
+                    // find closest to 2.5
+                    const target = height + 2.5;
+                    const rApprox = Math.round(D / target);
+                    r = Math.max(1, rApprox);
+                    g = (D / r) - height;
+                    status = 'INSUFICIENTE/DESPERDÍCIO';
+                    statusClass = 'text-red-600';
+                }
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-4 py-2 whitespace-nowrap">${cyl.z}</td>
+                    <td class="px-4 py-2 whitespace-nowrap">${r}</td>
+                    <td class="px-4 py-2 whitespace-nowrap">${g.toFixed(1)} mm</td>
+                    <td class="px-4 py-2 whitespace-nowrap ${statusClass} font-semibold">${status}</td>
+                `;
+                resultsBody.appendChild(row);
+            });
+
+            document.getElementById('results').classList.remove('hidden');
+        }
+
+        document.getElementById('calculateBtn').addEventListener('click', calculate);
+        document.getElementById('addCylinderBtn').addEventListener('click', addCylinder);
+        document.getElementById('manageBtn').addEventListener('click', () => {
+            document.getElementById('manageSection').classList.toggle('hidden');
+        });
+
+        loadCylinders();
+    </script>
+</body>
+</html>
