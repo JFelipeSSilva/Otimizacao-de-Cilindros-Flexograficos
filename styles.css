@@ -1,0 +1,90 @@
+:root {
+  --primary: #4F46E5;
+  --primary-hover: #4338CA;
+  --secondary: #16A34A;
+  --secondary-hover: #15803D;
+  --error: #DC2626;
+  --bg-main: #F3F4F6;
+  --surface-soft: #F9FAFB;
+  --surface-base: #FFFFFF;
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --border: #D1D5DB;
+}
+
+body {
+  background: var(--bg-main);
+  color: var(--text-primary);
+}
+
+.bg-app {
+  background: var(--bg-main);
+}
+
+.text-app {
+  color: var(--text-primary);
+}
+
+.bg-surface {
+  background: var(--surface-soft);
+}
+
+.bg-surface-alt {
+  background: var(--surface-base);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.border-light {
+  border-color: var(--border);
+}
+
+.focus-primary:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.35);
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn-secondary {
+  background-color: var(--secondary);
+  color: #ffffff;
+}
+
+.btn-secondary:hover {
+  background-color: var(--secondary-hover);
+}
+
+.btn-danger {
+  background-color: var(--error);
+  color: #ffffff;
+}
+
+.btn-danger:hover {
+  background-color: #991B1B;
+}
+
+.text-success {
+  color: var(--secondary);
+}
+
+.text-error {
+  color: var(--error);
+}
+
+.bg-card {
+  background-color: var(--surface-base);
+}
+
+.bg-soft {
+  background-color: var(--surface-soft);
+}
